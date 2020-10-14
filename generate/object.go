@@ -2,6 +2,7 @@ package generate
 
 import (
 	"faker/validation"
+	"strconv"
 )
 
 func GenerateObject(properties map[string]interface{}) map[string]interface{} {
@@ -55,14 +56,14 @@ func GenerateObject(properties map[string]interface{}) map[string]interface{} {
 
 	if _, present := properties["allOf"]; present {
 		for _, eachAllOfProp := range properties["allOf"].([]interface{}) {
-			for k, v := range GenerateObject(eachAllOfProp.(map[string]interface{})) {
+			for k, v := range ExecuteAllOf(eachAllOfProp.(map[string]interface{}), generatedObject) {
 				generatedObject[k] = v
 			}
 		}
 	}
 
 	if _, present := properties["oneOf"]; present {
-		for _, eachAllOfProp := range properties["allOf"].([]interface{}) {
+		for _, eachAllOfProp := range properties["oneOf"].([]interface{}) {
 			generatedObject = GenerateObject(eachAllOfProp.(map[string]interface{}))
 			break
 
@@ -77,6 +78,7 @@ func GenerateObject(properties map[string]interface{}) map[string]interface{} {
 	}
 
 	if _, present := properties["if"]; present {
+
 		isValidated, _ := validation.ValidateDataWithRespectToSchema(properties["if"].(map[string]interface{}), generatedObject)
 
 		if isValidated {
@@ -98,20 +100,20 @@ func GenerateObject(properties map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	// if len(generatedObject) == 0 {
-	// 	if _, minPropertiesPresent := properties["minProperties"]; minPropertiesPresent {
-	// 		minPropertiesPresent := int(properties["minProperties"].(float64))
+	if len(generatedObject) == 0 {
+		if _, minPropertiesPresent := properties["minProperties"]; minPropertiesPresent {
+			minPropertiesPresent := int(properties["minProperties"].(float64))
 
-	// 		for i := 0; i < minPropertiesPresent; i++ {
-	// 			generatedObject["test"+strconv.Itoa(i)] = i
-	// 		}
+			for i := 0; i < minPropertiesPresent; i++ {
+				generatedObject["test"+strconv.Itoa(i)] = i
+			}
 
-	// 		return generatedObject
-	// 	}
+			return generatedObject
+		}
 
-	// 	generatedObject["k1"] = "v1"
-	// 	generatedObject["k2"] = "v2"
-	// }
+		generatedObject["k1"] = "v1"
+		generatedObject["k2"] = "v2"
+	}
 
 	return generatedObject
 
