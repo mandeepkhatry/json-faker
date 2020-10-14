@@ -1,7 +1,7 @@
 package generate
 
 import (
-	"strconv"
+	"faker/validation"
 )
 
 func GenerateObject(properties map[string]interface{}) map[string]interface{} {
@@ -44,30 +44,13 @@ func GenerateObject(properties map[string]interface{}) map[string]interface{} {
 
 			if fieldType == "array" {
 				generatedObject[field] = GenerateArray(fieldProperties.(map[string]interface{}))
-
 			} else if fieldType == "object" {
 				generatedObject[field] = GenerateObject(fieldProperties.(map[string]interface{}))
 			} else {
 				generatedObject[field] = FieldToGenerator[fieldType](fieldProperties.(map[string]interface{}))
-
 			}
 
 		}
-	}
-
-	if len(generatedObject) == 0 {
-		if _, minPropertiesPresent := properties["minProperties"]; minPropertiesPresent {
-			minPropertiesPresent := int(properties["minProperties"].(float64))
-
-			for i := 0; i < minPropertiesPresent; i++ {
-				generatedObject["test"+strconv.Itoa(i)] = i
-			}
-
-			return generatedObject
-		}
-
-		generatedObject["k1"] = "v1"
-		generatedObject["k2"] = "v2"
 	}
 
 	if _, present := properties["allOf"]; present {
@@ -93,17 +76,41 @@ func GenerateObject(properties map[string]interface{}) map[string]interface{} {
 		}
 	}
 
-	//Generate object for then properties
-	if _, present := properties["then"]; present {
-		generatedObject = GenerateObject(properties["then"].(map[string]interface{})["properties"].(map[string]interface{}))
+	if _, present := properties["if"]; present {
+		isValidated, _ := validation.ValidateDataWithRespectToSchema(properties["if"].(map[string]interface{}), generatedObject)
+
+		if isValidated {
+			if _, present := properties["then"]; present {
+				thenObject := GenerateObject(properties["then"].(map[string]interface{}))
+
+				for k, v := range thenObject {
+					generatedObject[k] = v
+				}
+			}
+		} else {
+			if _, present := properties["else"]; present {
+				elseObject := GenerateObject(properties["else"].(map[string]interface{}))
+				for k, v := range elseObject {
+					generatedObject[k] = v
+				}
+			}
+
+		}
 	}
 
-	// if _, present := properties["required"]; present {
-	// 	object := make(map[string]interface{})
-	// 	for _, eachRequiredField := range properties["required"].([]interface{}) {
-	// 		object[eachRequiredField.(string)] = generatedObject[eachRequiredField.(string)]
+	// if len(generatedObject) == 0 {
+	// 	if _, minPropertiesPresent := properties["minProperties"]; minPropertiesPresent {
+	// 		minPropertiesPresent := int(properties["minProperties"].(float64))
+
+	// 		for i := 0; i < minPropertiesPresent; i++ {
+	// 			generatedObject["test"+strconv.Itoa(i)] = i
+	// 		}
+
+	// 		return generatedObject
 	// 	}
-	// 	return object
+
+	// 	generatedObject["k1"] = "v1"
+	// 	generatedObject["k2"] = "v2"
 	// }
 
 	return generatedObject

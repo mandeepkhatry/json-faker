@@ -9,8 +9,8 @@ import (
 func GenerateInteger(properties map[string]interface{}) int {
 
 	if _, present := properties["enum"]; present {
-		if len(properties["enum"].([]int)) != 0 {
-			return properties["enum"].([]int)[0]
+		if len(properties["enum"].([]interface{})) != 0 {
+			return int(properties["enum"].([]interface{})[0].(float64))
 		}
 	}
 
@@ -72,8 +72,8 @@ func GenerateInteger(properties map[string]interface{}) int {
 func GenerateFloat(properties map[string]interface{}) float64 {
 
 	if _, present := properties["enum"]; present {
-		if len(properties["enum"].([]float64)) != 0 {
-			return properties["enum"].([]float64)[0]
+		if len(properties["enum"].([]interface{})) != 0 {
+			return properties["enum"].([]interface{})[0].(float64)
 		}
 
 	}

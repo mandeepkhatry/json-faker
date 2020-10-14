@@ -9,8 +9,8 @@ import (
 func GenerateString(properties map[string]interface{}) string {
 
 	if _, present := properties["enum"]; present {
-		if len(properties["enum"].([]string)) != 0 {
-			return properties["enum"].([]string)[0]
+		if len(properties["enum"].([]interface{})) != 0 {
+			return properties["enum"].([]interface{})[0].(string)
 		}
 
 	}
@@ -58,5 +58,6 @@ func GenerateString(properties map[string]interface{}) string {
 	for i := range b {
 		b[i] = def.CharSet[rand.Intn(len(def.CharSet))]
 	}
+
 	return string(b)
 }
