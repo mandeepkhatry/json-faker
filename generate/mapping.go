@@ -11,4 +11,7 @@ var FieldToGenerator = map[string]func(properties map[string]interface{}) interf
 	"string": func(properties map[string]interface{}) interface{} {
 		return GenerateString(properties)
 	},
+	"boolean": func(properties map[string]interface{}) interface{} {
+		return GenerateBoolean(properties)
+	},
 }

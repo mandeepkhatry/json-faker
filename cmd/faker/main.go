@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"faker/generate"
+	"faker/faker"
 	"faker/matching"
 	"fmt"
 	"log"
@@ -56,10 +56,18 @@ func main() {
 	var prop map[string]interface{}
 	json.Unmarshal([]byte(jsonSchema), &prop)
 
-	//Application specific matching words
-	matchingWords := []string{}
-	//Wrap DataMatching for data matching of json schema
-	x := matching.DataMatching(generate.GenerateObject(prop), matchingWords)
-	fmt.Println(x)
+	fmt.Println("Fake Data : ", faker.Faker(prop).Build())
+
+	/*
+	  To match words lets say : username and confirm_username
+	  where format of similar field is matchingWord_{field}
+
+	  Different regions have different way of using the mactching words.
+
+	  Wrap DataMatching function over faker build and pass array of matching words.
+	*/
+	matchingWords := []string{"confirm"}
+
+	fmt.Println("Passing data matching : ", matching.DataMatching(faker.Faker(prop).Build(), matchingWords))
 
 }
